@@ -11,6 +11,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 
 class ControllerBox extends JFrame {
@@ -197,6 +198,20 @@ class ControllerBox extends JFrame {
             }
         });
         add(save);
+
+        JButton quit = new JButton("Exit");
+        quit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (JOptionPane.showConfirmDialog(
+                        ControllerBox.this, "Confirm quit?", "Confirm quit",
+                        JOptionPane.YES_NO_OPTION)
+                    == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+            }
+        });
+        add(quit);
     }
 
 }
