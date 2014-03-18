@@ -141,7 +141,7 @@ class ControllerBox extends JFrame {
 
         add(new JLabel("----------"));
 
-        JButton eraseButton = new JButton("Erase All");
+        JButton eraseButton = new JButton("Erase Transparent");
         eraseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -149,6 +149,15 @@ class ControllerBox extends JFrame {
             }
         });
         add(eraseButton);
+
+        JButton eraseWhiteButton = new JButton("Erase White");
+        eraseWhiteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.doClear(new Color(255, 255, 255, 255));
+            }
+        });
+        add(eraseWhiteButton);
 
         JButton undoButton = new JButton("Undo");
         undoButton.addActionListener(new ActionListener() {
