@@ -103,9 +103,14 @@ public class AnnotationTool extends JFrame {
         this.stroke = stroke;
     }
 
-    public void doClear() {
+    public void doClear(Paint paint) {
+        blockOutShapeDef.paint = paint;
         commitShape(blockOutShapeDef);
         repaint();
+    }
+    
+    public void doClear() {
+        doClear(clearPaint);
     }
 
     public void doSave() {
@@ -158,7 +163,6 @@ public class AnnotationTool extends JFrame {
     public void undo() {
         if (undoStack.size() > 0) { // item zero on the stack is the border
             ShapeDef sd = undoStack.pop();
-if (sd == blockOutShapeDef) System.err.println("undoing erase all...");
             redoStack.push(sd);
             paintFromUndoStack();
         }
@@ -167,7 +171,6 @@ if (sd == blockOutShapeDef) System.err.println("undoing erase all...");
     public void redo() {
         if (redoStack.size() > 0) {
             ShapeDef sd = redoStack.pop();
-if (sd == blockOutShapeDef) System.err.println("redoing erase all...");
             undoStack.push(sd);
             paintFromUndoStack();
         }
