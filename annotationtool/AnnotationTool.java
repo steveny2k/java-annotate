@@ -113,6 +113,12 @@ public class AnnotationTool extends JFrame {
         doClear(clearPaint);
     }
 
+    public void clearHistory() {
+        doClear();
+        undoStack.clear();
+        redoStack.clear();
+    }
+    
     public void doSave() {
         try {
             BufferedImage outImg = null;
@@ -161,7 +167,7 @@ public class AnnotationTool extends JFrame {
     private Path2D.Float p2d; // shape in progress...
 
     public void undo() {
-        if (undoStack.size() > 0) { // item zero on the stack is the border
+        if (undoStack.size() > 0) {
             ShapeDef sd = undoStack.pop();
             redoStack.push(sd);
             paintFromUndoStack();
@@ -204,8 +210,6 @@ public class AnnotationTool extends JFrame {
     @Override
     protected void processEvent(AWTEvent evt) {
         super.processEvent(evt);
-//        System.out.println("event " + evt + "\n  id = " + evt.getID());
-
         if (evt instanceof MouseEvent) {
             MouseEvent me = (MouseEvent) evt;
             if (me.getID() == MouseEvent.MOUSE_PRESSED) {

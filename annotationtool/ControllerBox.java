@@ -177,6 +177,15 @@ class ControllerBox extends JFrame {
         });
         add(redoButton);
 
+        JButton killHistoryButton = new JButton("Clear History");
+        killHistoryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                annotationTool.clearHistory();
+            }
+        });
+        add(killHistoryButton);
+
         add(new JLabel("----------"));
 
         JButton bringToTop = new JButton("Bring to top");
