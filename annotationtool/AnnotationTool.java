@@ -4,6 +4,7 @@ import java.awt.AWTEvent;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -11,14 +12,17 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Paint;
+import java.awt.Point;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Deque;
@@ -60,8 +64,21 @@ public class AnnotationTool extends JFrame {
 
         super("Drawing Frame");
         setUndecorated(true);
+
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+
+        try {
+            InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
+            System.out.println("Stream is " + imageStream);
+            Image image = ImageIO.read(imageStream);
+            Cursor c = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
+            setCursor(c);
+        } catch (IOException ioe) {
+            ioe.printStackTrace(System.err);
+        }
+
         setBounds(x - 5, y - 5, w + 10, h + 10);
-        
+
         Stroke blockOutStroke;
         Path2D.Float blockOutShape;
         blockOutStroke = new BasicStroke(h, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
@@ -79,10 +96,10 @@ public class AnnotationTool extends JFrame {
                 + AWTEvent.MOUSE_EVENT_MASK
                 + AWTEvent.MOUSE_MOTION_EVENT_MASK);
         setVisible(true);
-        
+
         backingMain = createImage(w, h);
         backingScratch = createImage(w, h);
-        
+
         Path2D.Float borderShape = new Path2D.Float();
         borderShape.moveTo(0, 0);
         borderShape.lineTo(w + 10, 0);
@@ -108,7 +125,7 @@ public class AnnotationTool extends JFrame {
         commitShape(blockOutShapeDef);
         repaint();
     }
-    
+
     public void doClear() {
         doClear(clearPaint);
     }
@@ -118,23 +135,24 @@ public class AnnotationTool extends JFrame {
         undoStack.clear();
         redoStack.clear();
     }
-    
+
     public void doSave() {
         try {
             BufferedImage outImg = null;
             if (backingMain instanceof BufferedImage) {
-                outImg = (BufferedImage)backingMain;
+                outImg = (BufferedImage) backingMain;
             } else if (backingMain instanceof ToolkitImage) {
-                outImg = ((ToolkitImage)backingMain).getBufferedImage();
+                outImg = ((ToolkitImage) backingMain).getBufferedImage();
             } else {
                 System.err.println("Hmm, not one of those two...");
             }
-                
+
             ImageIO.write(outImg, "png", new File("annotation-image" + new Date() + ".png"));
         } catch (IOException ex) {
             System.err.println("Save failed: " + ex.getMessage());
         }
     }
+
     @Override
     public void paint(Graphics graphics) {
 //        System.out.println("Paint...");
@@ -226,11 +244,13 @@ public class AnnotationTool extends JFrame {
     }
 
     public static void main(final String[] args) {
+        System.err.println("Annoation tool by simon@dancingcloudservices.com");
+        System.err.println("Icons by www.iconfinder.com");
         int x1 = 50, y1 = 50, w1 = 1280, h1 = 720;
         if (args.length == 2 || args.length == 4) {
             w1 = Integer.parseInt(args[0]);
             h1 = Integer.parseInt(args[1]);
-            if  (args.length == 4) {
+            if (args.length == 4) {
                 x1 = Integer.parseInt(args[2]);
                 y1 = Integer.parseInt(args[3]);
             }

@@ -2,10 +2,18 @@ package annotationtool;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -17,6 +25,40 @@ import javax.swing.JRadioButton;
 class ControllerBox extends JFrame {
 
     private AnnotationTool annotationTool;
+    private static final int SWATCH_SIZE = 24;
+
+    private static class SwatchIcon implements Icon {
+
+        private Paint paint;
+
+        public SwatchIcon(Paint p) {
+            System.out.println("Creating swatch");
+            this.paint = p;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setPaint(paint);
+            g2d.fillRect(x, y, SWATCH_SIZE, SWATCH_SIZE);
+            if (((AbstractButton)c).isSelected()) {
+                System.out.println("SELECTED...");
+                g2d.setColor(Color.BLACK);
+                g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+                g2d.drawRect(x, y, SWATCH_SIZE, SWATCH_SIZE);
+            }
+        }
+
+        @Override
+        public int getIconWidth() {
+            return SWATCH_SIZE;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return SWATCH_SIZE;
+        }
+    }
 
     private static class PaintPalletteItem {
 
@@ -24,28 +66,28 @@ class ControllerBox extends JFrame {
         Icon icon;
         Paint paint;
 
-        public PaintPalletteItem(String name, Icon icon, Paint paint) {
+        public PaintPalletteItem(String name, Paint paint) {
             this.name = name;
-            this.icon = icon;
             this.paint = paint;
+            this.icon = new SwatchIcon(paint);
         }
     }
 
     private static final PaintPalletteItem[] paintPalletteItems = {
-        new PaintPalletteItem("Red", null, new Color(255, 0, 0, 255)),
-        new PaintPalletteItem("Orange", null, new Color(255, 128, 0, 255)),
-        new PaintPalletteItem("Yellow", null, new Color(255, 255, 0, 255)),
-        new PaintPalletteItem("Green", null, new Color(0, 255, 0, 255)),
-        new PaintPalletteItem("Blue", null, new Color(0, 0, 255, 255)),
-        new PaintPalletteItem("Violet", null, new Color(255, 0, 255, 255)),
-        new PaintPalletteItem("Black", null, new Color(0, 0, 0, 255)),
-        new PaintPalletteItem("White", null, new Color(255, 255, 255, 255)),
-        new PaintPalletteItem("Highlighter Red", null, new Color(255, 0, 0, 128)),
-        new PaintPalletteItem("Highlighter Orange", null, new Color(255, 128, 0, 128)),
-        new PaintPalletteItem("Highlighter Yellow", null, new Color(255, 255, 0, 128)),
-        new PaintPalletteItem("Highlighter Green", null, new Color(0, 255, 0, 128)),
-        new PaintPalletteItem("Highlighter Blue", null, new Color(0, 0, 255, 128)),
-        new PaintPalletteItem("Eraser", null, new Color(0, 0, 0, 0))
+        new PaintPalletteItem("Red", new Color(255, 0, 0, 255)),
+        new PaintPalletteItem("Orange", new Color(255, 128, 0, 255)),
+        new PaintPalletteItem("Yellow", new Color(255, 255, 0, 255)),
+        new PaintPalletteItem("Green", new Color(0, 255, 0, 255)),
+        new PaintPalletteItem("Blue", new Color(0, 0, 255, 255)),
+        new PaintPalletteItem("Violet", new Color(255, 0, 255, 255)),
+        new PaintPalletteItem("Black", new Color(0, 0, 0, 255)),
+        new PaintPalletteItem("White", new Color(255, 255, 255, 255)),
+        new PaintPalletteItem("Highlighter Red", new Color(255, 0, 0, 128)),
+        new PaintPalletteItem("Highlighter Orange", new Color(255, 128, 0, 128)),
+        new PaintPalletteItem("Highlighter Yellow", new Color(255, 255, 0, 128)),
+        new PaintPalletteItem("Highlighter Green", new Color(0, 255, 0, 128)),
+        new PaintPalletteItem("Highlighter Blue", new Color(0, 0, 255, 128)),
+        new PaintPalletteItem("Eraser", new Color(0, 0, 0, 0))
     };
 
     private static class PaintPalletteActionListener implements ActionListener {
@@ -80,6 +122,7 @@ class ControllerBox extends JFrame {
         boolean first = true;
         for (PaintPalletteItem ppi : paintPalletteItems) {
             JRadioButton jrb = new JRadioButton(ppi.name, ppi.icon, first);
+//            jrb.setBackground((Color)ppi.paint);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
             add(jrb);
             toolGroup.add(jrb);
@@ -224,7 +267,7 @@ class ControllerBox extends JFrame {
                 if (JOptionPane.showConfirmDialog(
                         ControllerBox.this, "Confirm quit?", "Confirm quit",
                         JOptionPane.YES_NO_OPTION)
-                    == JOptionPane.YES_OPTION) {
+                        == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
             }
