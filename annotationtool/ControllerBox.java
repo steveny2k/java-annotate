@@ -3,16 +3,13 @@ package annotationtool;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
@@ -20,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 class ControllerBox extends JFrame {
@@ -37,13 +35,14 @@ class ControllerBox extends JFrame {
 
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
+            Dimension size = c.getSize();
             Graphics2D g2d = (Graphics2D) g;
             g2d.setPaint(paint);
-            g2d.fillRect(x, y, SWATCH_SIZE, SWATCH_SIZE);
+            g2d.fillRect(x, y, size.width, size.height);
             if (((AbstractButton)c).isSelected()) {
                 g2d.setColor(Color.BLACK);
-                g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
-                g2d.drawRect(x, y, SWATCH_SIZE, SWATCH_SIZE);
+                g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+                g2d.drawRect(x, y, size.width, size.height);
             }
         }
 
@@ -58,7 +57,7 @@ class ControllerBox extends JFrame {
         }
     }
 
-    private static final Color[] paintPalletteItems = {
+    private static final Color[] penColors = {
         new Color(255, 0, 0, 255),
         new Color(255, 128, 0, 255),
         new Color(255, 255, 0, 255),
@@ -67,6 +66,9 @@ class ControllerBox extends JFrame {
         new Color(255, 0, 255, 255),
         new Color(0, 0, 0, 255),
         new Color(255, 255, 255, 255),
+    };
+
+    private static final Color[] highlighterColors = {
         new Color(255, 0, 0, 128),
         new Color(255, 128, 0, 128),
         new Color(255, 255, 0, 128),
@@ -104,19 +106,23 @@ class ControllerBox extends JFrame {
         this.setAlwaysOnTop(true);
 
         ButtonGroup toolGroup = new ButtonGroup();
+        
+        add(new JLabel("Pens"));
+        JPanel penPanel = new JPanel();
+        penPanel.setLayout(new GridLayout(2, 4));
         boolean first = true;
-        for (Color ppi : paintPalletteItems) {
+        for (Color ppi : penColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
-            add(jrb);
+            penPanel.add(jrb);
             toolGroup.add(jrb);
             if (first) {
                 jrb.doClick();
                 first = false;
             }
         }
-
-        add(new JLabel("----------"));
+        add(penPanel);
+        add(new JLabel("Highlighters"));
 
         thinLine = new JRadioButton("Thin");
         thinLine.addActionListener(new ActionListener() {
