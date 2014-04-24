@@ -6,10 +6,14 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
@@ -19,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import util.GridBagConstraintBuilder;
 
 class ControllerBox extends JFrame {
 
@@ -39,7 +44,7 @@ class ControllerBox extends JFrame {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setPaint(paint);
             g2d.fillRect(x, y, size.width, size.height);
-            if (((AbstractButton)c).isSelected()) {
+            if (((AbstractButton) c).isSelected()) {
                 g2d.setColor(Color.BLACK);
                 g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
                 g2d.drawRect(x, y, size.width, size.height);
@@ -65,8 +70,7 @@ class ControllerBox extends JFrame {
         new Color(0, 0, 255, 255),
         new Color(255, 0, 255, 255),
         new Color(0, 0, 0, 255),
-        new Color(255, 255, 255, 255),
-    };
+        new Color(255, 255, 255, 255),};
 
     private static final Color[] highlighterColors = {
         new Color(255, 0, 0, 128),
@@ -102,27 +106,37 @@ class ControllerBox extends JFrame {
         super("Tools");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         annotationTool = at;
-        setLayout(new GridLayout(30, 1));
+        setLayout(new GridBagLayout());
+        GridBagConstraintBuilder gbcb = new GridBagConstraintBuilder(6);
         this.setAlwaysOnTop(true);
 
         ButtonGroup toolGroup = new ButtonGroup();
-        
-        add(new JLabel("Pens"));
-        JPanel penPanel = new JPanel();
-        penPanel.setLayout(new GridLayout(2, 4));
+
+        add(new JLabel("Pens"), gbcb.fullWidth().build());
+        gbcb.nextY().singleWidth();
         boolean first = true;
         for (Color ppi : penColors) {
             JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
             jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
-            penPanel.add(jrb);
+            add(jrb, gbcb.build());
+            gbcb.nextX();
             toolGroup.add(jrb);
             if (first) {
                 jrb.doClick();
                 first = false;
             }
         }
-        add(penPanel);
-        add(new JLabel("Highlighters"));
+        add(new JLabel("Highlighters"), gbcb.fullWidth().nextX().build());
+        gbcb.nextY().singleWidth();
+
+        for (Color ppi : highlighterColors) {
+            JRadioButton jrb = new JRadioButton(null, new SwatchIcon(ppi), first);
+            jrb.addActionListener(new PaintPalletteActionListener(at, ppi));
+            add(jrb, gbcb.build());
+            gbcb.nextX();
+            toolGroup.add(jrb);
+        }
+        add(new JLabel("Pen Sizes"), gbcb.fullWidth().nextY().build());
 
         thinLine = new JRadioButton("Thin");
         thinLine.addActionListener(new ActionListener() {
@@ -132,7 +146,8 @@ class ControllerBox extends JFrame {
                         new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        add(thinLine);
+        add(thinLine, gbcb.nextY().build());
+        gbcb.nextY();
 
         thinLine.doClick();
 
@@ -144,7 +159,8 @@ class ControllerBox extends JFrame {
                         new BasicStroke(15, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        add(mediumLine);
+        add(mediumLine, gbcb.build());
+        gbcb.nextY();
 
         thickLine = new JRadioButton("Thick");
         thickLine.addActionListener(new ActionListener() {
@@ -154,7 +170,8 @@ class ControllerBox extends JFrame {
                         new BasicStroke(30, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        add(thickLine);
+        add(thickLine, gbcb.build());
+        gbcb.nextY();
 
         hugeLine = new JRadioButton("Huge");
         hugeLine.addActionListener(new ActionListener() {
@@ -164,7 +181,8 @@ class ControllerBox extends JFrame {
                         new BasicStroke(70, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             }
         });
-        add(hugeLine);
+        add(hugeLine, gbcb.build());
+        gbcb.nextY();
 
         ButtonGroup thicknessGroup = new ButtonGroup();
         thicknessGroup.add(thinLine);
@@ -172,7 +190,8 @@ class ControllerBox extends JFrame {
         thicknessGroup.add(thickLine);
         thicknessGroup.add(hugeLine);
 
-        add(new JLabel("----------"));
+        add(new JLabel("----------"), gbcb.build());
+        gbcb.nextY();
 
         JButton eraseButton = new JButton("Erase Transparent");
         eraseButton.addActionListener(new ActionListener() {
@@ -181,7 +200,8 @@ class ControllerBox extends JFrame {
                 annotationTool.doClear();
             }
         });
-        add(eraseButton);
+        add(eraseButton, gbcb.build());
+        gbcb.nextY();
 
         JButton eraseWhiteButton = new JButton("Erase White");
         eraseWhiteButton.addActionListener(new ActionListener() {
@@ -190,7 +210,8 @@ class ControllerBox extends JFrame {
                 annotationTool.doClear(new Color(255, 255, 255, 255));
             }
         });
-        add(eraseWhiteButton);
+        add(eraseWhiteButton, gbcb.build());
+        gbcb.nextY();
 
         JButton undoButton = new JButton("Undo");
         undoButton.addActionListener(new ActionListener() {
@@ -199,7 +220,8 @@ class ControllerBox extends JFrame {
                 annotationTool.undo();
             }
         });
-        add(undoButton);
+        add(undoButton, gbcb.build());
+        gbcb.nextY();
 
         JButton redoButton = new JButton("Redo");
         redoButton.addActionListener(new ActionListener() {
@@ -208,7 +230,8 @@ class ControllerBox extends JFrame {
                 annotationTool.redo();
             }
         });
-        add(redoButton);
+        add(redoButton, gbcb.build());
+        gbcb.nextY();
 
         JButton killHistoryButton = new JButton("Clear History");
         killHistoryButton.addActionListener(new ActionListener() {
@@ -217,9 +240,11 @@ class ControllerBox extends JFrame {
                 annotationTool.clearHistory();
             }
         });
-        add(killHistoryButton);
+        add(killHistoryButton, gbcb.build());
+        gbcb.nextY();
 
-        add(new JLabel("----------"));
+        add(new JLabel("----------"), gbcb.build());
+        gbcb.nextY();
 
         JButton bringToTop = new JButton("Bring to top");
         bringToTop.addActionListener(new ActionListener() {
@@ -229,7 +254,8 @@ class ControllerBox extends JFrame {
                 annotationTool.setAlwaysOnTop(true);
             }
         });
-        add(bringToTop);
+        add(bringToTop, gbcb.build());
+        gbcb.nextY();
 
         JButton sendBack = new JButton("Send to back");
         sendBack.addActionListener(new ActionListener() {
@@ -239,7 +265,8 @@ class ControllerBox extends JFrame {
                 annotationTool.toBack();
             }
         });
-        add(sendBack);
+        add(sendBack, gbcb.build());
+        gbcb.nextY();
 
         JButton save = new JButton("Save image");
         save.addActionListener(new ActionListener() {
@@ -248,7 +275,8 @@ class ControllerBox extends JFrame {
                 annotationTool.doSave();
             }
         });
-        add(save);
+        add(save, gbcb.build());
+        gbcb.nextY();
 
         JButton quit = new JButton("Exit");
         quit.addActionListener(new ActionListener() {
@@ -262,7 +290,19 @@ class ControllerBox extends JFrame {
                 }
             }
         });
-        add(quit);
+        add(quit, gbcb.build());
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (JOptionPane.showConfirmDialog(
+                        ControllerBox.this, "Confirm quit?", "Confirm quit",
+                        JOptionPane.YES_NO_OPTION)
+                        == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
+            }
+        });
+        gbcb.nextY();
     }
 
 }
