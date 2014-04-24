@@ -59,6 +59,8 @@ public class AnnotationTool extends JFrame {
 
     private Deque<ShapeDef> undoStack = new ArrayDeque<ShapeDef>();
     private Deque<ShapeDef> redoStack = new ArrayDeque<ShapeDef>();
+    
+    private int saveImageIndex = 0;
 
     public AnnotationTool(int x, int y, int w, int h) {
 
@@ -137,6 +139,14 @@ public class AnnotationTool extends JFrame {
     }
 
     public void doSave() {
+        // find filename for use
+        File outFile;
+        do {
+           String fname = String.format("image-%06d.png", saveImageIndex++);
+            System.out.println("Trying " + fname);
+            outFile = new File(fname);
+        } while (outFile.exists());
+        
         try {
             BufferedImage outImg = null;
             if (backingMain instanceof BufferedImage) {
@@ -147,7 +157,7 @@ public class AnnotationTool extends JFrame {
                 System.err.println("Hmm, not one of those two...");
             }
 
-            ImageIO.write(outImg, "png", new File("annotation-image" + new Date() + ".png"));
+            ImageIO.write(outImg, "png", outFile);
         } catch (IOException ex) {
             System.err.println("Save failed: " + ex.getMessage());
         }
@@ -155,8 +165,6 @@ public class AnnotationTool extends JFrame {
 
     @Override
     public void paint(Graphics graphics) {
-//        System.out.println("Paint...");
-
         // Blank out the scratch image
         Graphics2D gScratch = (Graphics2D) backingScratch.getGraphics();
         gScratch.setComposite(AlphaComposite.Src);
