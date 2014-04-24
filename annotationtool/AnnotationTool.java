@@ -16,6 +16,10 @@ import java.awt.Point;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -24,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
-import java.util.Date;
 import java.util.Deque;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
@@ -59,7 +62,10 @@ public class AnnotationTool extends JFrame {
 
     private Deque<ShapeDef> undoStack = new ArrayDeque<ShapeDef>();
     private Deque<ShapeDef> redoStack = new ArrayDeque<ShapeDef>();
-    
+
+    private Cursor defaultCursor;
+    private Cursor pencilCursor;
+
     private int saveImageIndex = 0;
 
     public AnnotationTool(int x, int y, int w, int h) {
@@ -73,8 +79,9 @@ public class AnnotationTool extends JFrame {
             InputStream imageStream = this.getClass().getResourceAsStream("pencil-32.png");
             System.out.println("Stream is " + imageStream);
             Image image = ImageIO.read(imageStream);
-            Cursor c = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
-            setCursor(c);
+            pencilCursor = toolkit.createCustomCursor(image, new Point(0, 26), "pencil");
+            defaultCursor = getCursor();
+//            setCursor(pencilCursor);
         } catch (IOException ioe) {
             ioe.printStackTrace(System.err);
         }
@@ -138,14 +145,26 @@ public class AnnotationTool extends JFrame {
         redoStack.clear();
     }
 
+    final ClipboardOwner clipboardOwner = new ClipboardOwner() {
+        @Override
+        public void lostOwnership(Clipboard clipboard, Transferable contents) {
+        }
+    };
+
     public void doSave() {
         // find filename for use
         File outFile;
+        String fname;
         do {
-           String fname = String.format("image-%06d.png", saveImageIndex++);
+            fname = String.format("image-%06d.png", saveImageIndex++);
             System.out.println("Trying " + fname);
             outFile = new File(fname);
         } while (outFile.exists());
+
+        String imageTag = "<img src='" + fname +"'>";
+        Clipboard clip = this.getToolkit().getSystemClipboard();
+        clip.setContents(new StringSelection(imageTag), clipboardOwner);
+        System.out.println(imageTag);
         
         try {
             BufferedImage outImg = null;
