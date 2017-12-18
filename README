@@ -1,3 +1,7 @@
+SUPERSEDED. Don't use this one, since it includes Java 6 specific developmemnt APIS
+Instead, new project "Annotate2" has been updated to use the final production versions
+of those APIs and transparency should work properly on all platforms 
+
 This is a simple Java-based program that allows annotating a region of your screen, such as might be used for screen-captures or other kinds of presentation.
 
 (I would have used Ardesia, but it doesn't work on my system...)
